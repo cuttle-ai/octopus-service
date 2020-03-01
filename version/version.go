@@ -5,12 +5,20 @@
 //Package version has the version information about the application
 package version
 
-const (
+//Version is the version of application
+type Version struct {
+	//Code is semivar code of the version
+	Code string
+	//API is the api version of the application
+	API string
+}
+
+var (
 	//V1 is the version 1 of the application
-	V1 = "v1.0.0"
+	V1 = Version{Code: "v1.0.0", API: "v1"}
 )
 
-const (
+var (
 	//Default stores the current version of the application
 	Default = V1
 )

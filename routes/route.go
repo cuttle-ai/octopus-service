@@ -42,7 +42,7 @@ func (r Route) Register(s *http.ServeMux) {
 	 * If the route version is default version then will register it without version string to http handler
 	 * Will register the router with the http handler
 	 */
-	if r.Version == version.Default {
+	if r.Version == version.Default.API {
 		s.Handle(r.Pattern, http.TimeoutHandler(r, config.ResponseTimeout, "timeout"))
 	}
 	s.Handle("/"+r.Version+r.Pattern, http.TimeoutHandler(r, config.ResponseTimeout, "timeout"))
