@@ -11,6 +11,8 @@ import (
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
+	authConfig "github.com/cuttle-ai/auth-service/config"
+
 	"github.com/jinzhu/gorm"
 )
 
@@ -75,6 +77,8 @@ type AppContext struct {
 	Db *gorm.DB
 	//Log for logging purposes
 	Log Logger
+	//Session is the session associated with the request
+	Session authConfig.Session
 }
 
 var rootAppContext *AppContext

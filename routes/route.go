@@ -14,6 +14,8 @@ import (
 	"github.com/cuttle-ai/octopus-service/version"
 
 	"github.com/cuttle-ai/octopus-service/config"
+
+	authConfig "github.com/cuttle-ai/auth-service/config"
 )
 
 /*
@@ -31,6 +33,8 @@ type Route struct {
 	Pattern string
 	//HandlerFunc is the handler func of the route
 	HandlerFunc HandlerFunc
+	//ParseForm will do a form parse before invoking the handler
+	ParseForm bool
 }
 
 //AppContextKey is the key with which the application is saved in the request context
@@ -52,7 +56,9 @@ func (r Route) Register(s *http.ServeMux) {
 func (r Route) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	/*
 	 * Will get the context
-	 * Will parse the form
+	 * Will parse the form if enabled
+	 * We will get the auth-access token from the header
+	 * Will get session information about the logged in user
 	 * We will fetch the app context for the request
 	 * If app contexts have exhausted, we will reject the request
 	 * Then we will set the app context in request
@@ -63,20 +69,43 @@ func (r Route) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
 	//parsing the form
-	err := req.ParseForm()
-	if err != nil {
-		//error while parsing the form
-		log.Error("Error while parsing the request form", err)
-		response.WriteError(res, response.Error{Err: "Couldn't parse the request form"}, http.StatusUnprocessableEntity)
+	if r.ParseForm {
+		err := req.ParseForm()
+		if err != nil {
+			//error while parsing the form
+			log.Error("Error while parsing the request form", err)
+			response.WriteError(res, response.Error{Err: "Couldn't parse the request form"}, http.StatusUnprocessableEntity)
+			_, cancel := context.WithCancel(ctx)
+			cancel()
+			return
+		}
+	}
+
+	//getting the auth token from the header
+	cookie, cErr := req.Cookie(authConfig.AuthHeaderKey)
+	if cErr != nil {
+		log.Warn("Auth cookie not found")
+		response.WriteError(res, response.Error{Err: "Couldn't find the auth header " + authConfig.AuthHeaderKey}, http.StatusForbidden)
 		_, cancel := context.WithCancel(ctx)
 		cancel()
 		return
 	}
+	//we will try get the session information about the user
+	u, ok := authConfig.GetAutenticatedUser(cookie.Value)
+	if !ok {
+		log.Warn("User information not found the given auth header")
+		response.WriteError(res, response.Error{Err: "Couldn't find the user session " + cookie.Value}, http.StatusForbidden)
+		_, cancel := context.WithCancel(ctx)
+		cancel()
+		return
+	}
+	sess := authConfig.Session{ID: cookie.Value, Authenticated: true, User: &u}
 
 	//fetching the app context
 	appCtxReq := AppContextRequest{
-		Type: Get,
-		Out:  make(chan AppContextRequest),
+		Type:    Get,
+		Out:     make(chan AppContextRequest),
+		Session: sess,
 	}
 	go SendRequest(AppContextRequestChan, appCtxReq)
 	resCtx := <-appCtxReq.Out

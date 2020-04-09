@@ -25,5 +25,5 @@ var (
 
 const (
 	//AppName is the name of the application
-	AppName = "Octopus Service"
+	AppName = "octopus-service"
 )

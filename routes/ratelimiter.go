@@ -7,6 +7,7 @@ package routes
 import (
 	"time"
 
+	authConfig "github.com/cuttle-ai/auth-service/config"
 	"github.com/cuttle-ai/octopus-service/config"
 	"github.com/cuttle-ai/octopus-service/log"
 )
@@ -39,6 +40,8 @@ type AppContextRequest struct {
 	Out chan AppContextRequest
 	//Exhausted flag states whether the app context exhausted
 	Exhausted bool
+	//Session is  the user session
+	Session authConfig.Session
 }
 
 var AppContextRequestChan = make(chan AppContextRequest)
@@ -81,6 +84,9 @@ func AppContext(in chan AppContextRequest) {
 			usedMaps[id] = time.Now()
 			req.AppContext = config.NewAppContext(log.NewLogger(id))
 			req.Exhausted = false
+
+			//we will also set the session
+			req.AppContext.Session = req.Session
 			go SendRequest(req.Out, req)
 		case Finished:
 			//we will return the rewwuest ids
