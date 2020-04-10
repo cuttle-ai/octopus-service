@@ -20,7 +20,13 @@ import (
 
 var (
 	//Port in which the application is being served
-	Port = "8080"
+	Port = "8087"
+	//IntPort is the port converted into integer
+	IntPort = 8087
+	//RPCPort in which the application's rpc server is being served
+	RPCPort = "8088"
+	//RPCIntPort is the rpc port converted into integer
+	RPCIntPort = 8088
 	//ResponseTimeout of the api to respond in milliseconds
 	ResponseTimeout = time.Duration(100 * time.Millisecond)
 	//RequestRTimeout of the api request body read timeout in milliseconds
@@ -31,7 +37,12 @@ var (
 	MaxRequests = 1000
 	//RequestCleanUpCheck is the time after which request cleanup check has to happen
 	RequestCleanUpCheck = time.Duration(2 * time.Minute)
-	//CleanUpCheckBatchSize is the no. of clean up checks to be done
+	//DiscoveryURL is the url of the discovery service
+	DiscoveryURL = "127.0.0.1:8500"
+	//DiscoveryToken is the token to communicate with discovery service
+	DiscoveryToken = ""
+	//ServiceDomain is the url on which the service will be available across the platform
+	ServiceDomain = "127.0.0.1"
 )
 
 //SkipVault will skip the vault initialization if set true
@@ -95,6 +106,7 @@ func checkError(err error) {
 func init() {
 	/*
 	 * We will init the port
+	 * We will init rpc port
 	 * We will init the request timeout
 	 * We will init the request body read timeout
 	 * We will init the request body write timeout
@@ -103,8 +115,20 @@ func init() {
 	 */
 	//port
 	if len(os.Getenv("PORT")) != 0 {
-		//Assign the default port as 9090
+		//Assign the default port as 8087
 		Port = os.Getenv("PORT")
+	}
+
+	//rpc port
+	if len(os.Getenv("RPC_PORT")) != 0 {
+		//Assign the default port as 8088
+		RPCPort = os.Getenv("RPC_PORT")
+		ip, err := strconv.Atoi(RPCPort)
+		if err != nil {
+			//error whoile converting the port to integer
+			log.Fatal("Error while converting the port to integer", err.Error())
+		}
+		RPCIntPort = ip
 	}
 
 	//response timeout
@@ -145,6 +169,24 @@ func init() {
 		if t, err := strconv.ParseInt(os.Getenv("REQUEST_CLEAN_UP_CHECK"), 10, 64); err == nil {
 			RequestCleanUpCheck = time.Duration(t * int64(time.Minute))
 		}
+	}
+
+	//discovery service url
+	if len(os.Getenv("DISCOVERY_URL")) != 0 {
+		DiscoveryURL = os.Getenv("DISCOVERY_URL")
+	}
+
+	//discovery service token
+	if len(os.Getenv("DISCOVERY_TOKEN")) != 0 {
+		DiscoveryToken = os.Getenv("DISCOVERY_TOKEN")
+	}
+	if len(DiscoveryToken) == 0 {
+		log.Fatal("Token for discovery service is missing. Can't start the application without it")
+	}
+
+	//service domain
+	if len(os.Getenv("SERVICE_DOMAIN")) != 0 {
+		ServiceDomain = os.Getenv("SERVICE_DOMAIN")
 	}
 }
 
