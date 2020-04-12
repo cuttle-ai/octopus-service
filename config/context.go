@@ -12,6 +12,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
 	authConfig "github.com/cuttle-ai/auth-service/config"
+	"github.com/cuttle-ai/octopus-service/dict"
 
 	"github.com/jinzhu/gorm"
 )
@@ -87,6 +88,7 @@ func init() {
 	/*
 	 * We will initialize the context
 	 * We will connect to the database
+	 * We will initialize the dictionary
 	 */
 	rootAppContext = &AppContext{}
 
@@ -94,6 +96,8 @@ func init() {
 	if err != nil {
 		log.Fatal("Error while creating the root app context. Connecting to DB failed. ", err)
 	}
+
+	dict.InitDictionary(rootAppContext.Db)
 }
 
 //NewAppContext returns an initlized app context

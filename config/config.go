@@ -28,11 +28,11 @@ var (
 	//RPCIntPort is the rpc port converted into integer
 	RPCIntPort = 8088
 	//ResponseTimeout of the api to respond in milliseconds
-	ResponseTimeout = time.Duration(100 * time.Millisecond)
+	ResponseTimeout = time.Duration(13000 * time.Millisecond)
 	//RequestRTimeout of the api request body read timeout in milliseconds
-	RequestRTimeout = time.Duration(20 * time.Millisecond)
+	RequestRTimeout = time.Duration(2000 * time.Millisecond)
 	//ResponseWTimeout of the api response write timeout in milliseconds
-	ResponseWTimeout = time.Duration(20 * time.Millisecond)
+	ResponseWTimeout = time.Duration(10000 * time.Millisecond)
 	//MaxRequests is the maximum no. of requests catered at a given point of time
 	MaxRequests = 1000
 	//RequestCleanUpCheck is the time after which request cleanup check has to happen

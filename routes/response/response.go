@@ -22,6 +22,14 @@ type Error struct {
 	Err string `json:"error"`
 }
 
+//Message is the message to be given for successfull response
+type Message struct {
+	//Message associated with
+	Message string
+	//Data is payload
+	Data interface{}
+}
+
 //WriteError will write to the error response to the response writer
 func WriteError(res http.ResponseWriter, err Error, code int) {
 	/*
@@ -38,7 +46,7 @@ func WriteError(res http.ResponseWriter, err Error, code int) {
 
 //Write will write the response to the response writer
 //payload is any json serializable object
-func Write(res http.ResponseWriter, payload interface{}) {
+func Write(res http.ResponseWriter, payload Message) {
 	/*
 	 * Will use json encoder to write response
 	 */

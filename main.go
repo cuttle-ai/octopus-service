@@ -14,6 +14,8 @@ import (
 	"github.com/cuttle-ai/octopus-service/config"
 	"github.com/cuttle-ai/octopus-service/log"
 	"github.com/cuttle-ai/octopus-service/routes"
+	_ "github.com/cuttle-ai/octopus-service/routes/dict"
+	_ "github.com/cuttle-ai/octopus-service/routes/interpreter"
 )
 
 /*
@@ -48,6 +50,10 @@ func main() {
 	go func() {
 		log.Info("Starting the server at :" + config.Port)
 		log.Error(s.ListenAndServe())
+	}()
+	go func() {
+		log.Info("Starting the rpc service at :" + config.RPCPort)
+		config.StartRPC()
 	}()
 
 	//listening for syscalls

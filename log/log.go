@@ -8,8 +8,6 @@ package log
 import (
 	"fmt"
 	"log"
-
-	"github.com/cuttle-ai/octopus-service/config"
 )
 
 //Log types for logger
@@ -34,9 +32,6 @@ func Info(l ...interface{}) {
 //Debug logs the debug logs of the application if debug logs are not switched off
 func Debug(l ...interface{}) {
 	//Checking if Debug log is off
-	if config.PRODUCTION == 0 {
-		return
-	}
 	log.Print(DEBUG+": ", fmt.Sprintln(l...))
 }
 

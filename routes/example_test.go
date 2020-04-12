@@ -72,9 +72,7 @@ func ExampleAddRoutes() {
 func ExampleHandlerFunc() {
 	//Example for creating a simple handler function
 	f := func(ctx context.Context, res http.ResponseWriter, req *http.Request) {
-		response.Write(res, map[string]string{
-			"Message": "hi",
-		})
+		response.Write(res, response.Message{Message: "hi"})
 	}
 	routes.AddRoutes(routes.Route{
 		Version:     "v1",
@@ -104,9 +102,7 @@ func ExampleHandlerFunc_context() {
 		select {
 		case <-tm:
 			//we get the response
-			response.Write(res, map[string]string{
-				"Message": "hi",
-			})
+			response.Write(res, response.Message{Message: "hi"})
 		case <-ctx.Done():
 			//if timeout wins. Handle it gracefully.
 			//No need to write the response
