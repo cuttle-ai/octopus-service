@@ -18,7 +18,9 @@ require (
 	github.com/cuttle-ai/auth-service v0.0.0-00010101000000-000000000000
 	github.com/cuttle-ai/brain v0.0.0-00010101000000-000000000000
 	github.com/cuttle-ai/configs v0.0.0-20190824112953-7860fdfd0dae
+	github.com/cuttle-ai/db-toolkit v0.0.0-00010101000000-000000000000
+	github.com/cuttle-ai/go-sdk v0.0.0-00010101000000-000000000000
 	github.com/cuttle-ai/octopus v0.0.0-00010101000000-000000000000
-	github.com/hashicorp/consul/api v1.2.0
+	github.com/hashicorp/consul/api v1.4.0
 	github.com/jinzhu/gorm v1.9.12
 )
