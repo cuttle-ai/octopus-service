@@ -25,7 +25,7 @@ func GetDict(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	 */
 	//getting the app context
 	appCtx := ctx.Value(routes.AppContextKey).(*config.AppContext)
-	appCtx.Log.Info("Got a request to interpret a query by", appCtx.Session.User.ID)
+	appCtx.Log.Info("Got a request to get fetch the dictionary by", appCtx.Session.User.ID)
 
 	//getting the dictionary
 	req := interpreter.DICTRequest{ID: strconv.Itoa(int(appCtx.Session.User.ID)), Type: interpreter.DICTGet, Out: make(chan interpreter.DICTRequest)}
