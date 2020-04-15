@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/cuttle-ai/brain/visualization"
 	"github.com/cuttle-ai/octopus-service/config"
 	"github.com/cuttle-ai/octopus-service/db"
 	"github.com/cuttle-ai/octopus-service/routes"
@@ -24,6 +25,12 @@ type Query struct {
 	NL string `json:"nl,omitempty"`
 }
 
+//QueryResult has the interpreter query and recommended visualization
+type QueryResult struct {
+	interpreter.Query
+	visualization.Visualization
+}
+
 //Interpret will interpret a given natural language query
 func Interpret(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	/*
@@ -31,6 +38,7 @@ func Interpret(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	 * Then we will parse the request payload query
 	 * Then we will tokenize the query
 	 * Then we will interpret the query
+	 * Then We will get the suggested visualization
 	 * Then we will write the response
 	 */
 	//getting the app context
@@ -67,8 +75,11 @@ func Interpret(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//getting the suggested visualization
+	vis := visualization.SuggestVisualization(ins)
+
 	//writing the response
-	response.Write(w, response.Message{Message: "successfully interpreted the query", Data: ins})
+	response.Write(w, response.Message{Message: "successfully interpreted the query", Data: QueryResult{Query: *ins, Visualization: vis}})
 }
 
 //Search will interpret and find the result the given natural language query
@@ -79,6 +90,7 @@ func Search(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	 * Then we will tokenize the query
 	 * Then we will interpret the query
 	 * Then we will execute the query
+	 * Then We will get the suggested visualization
 	 * Then we will write the response
 	 */
 	//getting the app context
@@ -124,8 +136,11 @@ func Search(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//getting the suggested visualization
+	vis := visualization.SuggestVisualization(ins)
+
 	//writing the response
-	response.Write(w, response.Message{Message: "successfully search the query", Data: ins})
+	response.Write(w, response.Message{Message: "successfully search the query", Data: QueryResult{Query: *ins, Visualization: vis}})
 }
 
 func init() {
