@@ -16,6 +16,12 @@ import (
 	"github.com/cuttle-ai/octopus/interpreter"
 )
 
+//Dict is the dto for the API
+type Dict struct {
+	//ID of the dicytionary
+	ID uint
+}
+
 //GetDict will return the dictionary being used
 func GetDict(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	/*
@@ -36,12 +42,36 @@ func GetDict(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	response.Write(w, response.Message{Message: "successfully fetched the dictionary", Data: res.DICT})
 }
 
+//RemoveDict will remove a dictionary from cache
+func RemoveDict(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	/*
+	 * First we will get the app context
+	 * Then we will remove the dict
+	 * Then we will write the response
+	 */
+	//getting the app context
+	appCtx := ctx.Value(routes.AppContextKey).(*config.AppContext)
+	appCtx.Log.Info("Got a request to remove the dictionary by", appCtx.Session.User.ID)
+
+	//removing the dictionary
+	req := interpreter.DICTRequest{ID: strconv.Itoa(int(appCtx.Session.User.ID)), Type: interpreter.DICTRemove}
+	go interpreter.SendDICTToChannel(interpreter.DICTInputChannel, req)
+
+	//writing the response
+	response.Write(w, response.Message{Message: "successfully removed the dictionary"})
+}
+
 func init() {
 	routes.AddRoutes(
 		routes.Route{
 			Version:     "v1",
 			Pattern:     "/dict",
 			HandlerFunc: GetDict,
+		},
+		routes.Route{
+			Version:     "v1",
+			Pattern:     "/dict/remove",
+			HandlerFunc: RemoveDict,
 		},
 	)
 }
