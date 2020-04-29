@@ -61,6 +61,25 @@ func RemoveDict(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	response.Write(w, response.Message{Message: "successfully removed the dictionary"})
 }
 
+//UpdateDict will update teh dict in the cache
+func UpdateDict(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	/*
+	 * First we will get the app context
+	 * Then we will update the dict
+	 * Then we will write the response
+	 */
+	//getting the app context
+	appCtx := ctx.Value(routes.AppContextKey).(*config.AppContext)
+	appCtx.Log.Info("Got a request to update the dictionary by", appCtx.Session.User.ID)
+
+	//updating the dictionary
+	req := interpreter.DICTRequest{ID: strconv.Itoa(int(appCtx.Session.User.ID)), Type: interpreter.DICTUpdate}
+	go interpreter.SendDICTToChannel(interpreter.DICTInputChannel, req)
+
+	//writing the response
+	response.Write(w, response.Message{Message: "successfully updated the dictionary"})
+}
+
 func init() {
 	routes.AddRoutes(
 		routes.Route{
@@ -72,6 +91,11 @@ func init() {
 			Version:     "v1",
 			Pattern:     "/dict/remove",
 			HandlerFunc: RemoveDict,
+		},
+		routes.Route{
+			Version:     "v1",
+			Pattern:     "/dict/update",
+			HandlerFunc: UpdateDict,
 		},
 	)
 }
