@@ -14,7 +14,7 @@ import (
 )
 
 //Exec will execute a query and return the result
-func Exec(a config.AppContext, q interpreter.Query) (interface{}, error) {
+func Exec(a config.AppContext, q interpreter.Query) ([]map[string]interface{}, error) {
 	/*
 	 * Based on the number of tables avaiable in the query, we will execute the same
 	 */
@@ -31,7 +31,7 @@ func Exec(a config.AppContext, q interpreter.Query) (interface{}, error) {
 }
 
 //SingleTableMode execute the given query in a single table mode. So the query is expected not to have any joins or so
-func SingleTableMode(a config.AppContext, q interpreter.Query) (interface{}, error) {
+func SingleTableMode(a config.AppContext, q interpreter.Query) ([]map[string]interface{}, error) {
 	/*
 	 * We will convert the query into sql
 	 * Then we will get the table from which query has to happen
