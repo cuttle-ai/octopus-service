@@ -117,6 +117,12 @@ func init() {
 	if len(os.Getenv("PORT")) != 0 {
 		//Assign the default port as 8087
 		Port = os.Getenv("PORT")
+		ip, err := strconv.Atoi(Port)
+		if err != nil {
+			//error whoile converting the port to integer
+			log.Fatal("Error while converting the port to integer", err.Error())
+		}
+		IntPort = ip
 	}
 
 	//rpc port
@@ -125,8 +131,8 @@ func init() {
 		RPCPort = os.Getenv("RPC_PORT")
 		ip, err := strconv.Atoi(RPCPort)
 		if err != nil {
-			//error whoile converting the port to integer
-			log.Fatal("Error while converting the port to integer", err.Error())
+			//error whoile converting the rpc port to integer
+			log.Fatal("Error while converting the rpc port to integer", err.Error())
 		}
 		RPCIntPort = ip
 	}
@@ -180,6 +186,7 @@ func init() {
 	if len(os.Getenv("DISCOVERY_TOKEN")) != 0 {
 		DiscoveryToken = os.Getenv("DISCOVERY_TOKEN")
 	}
+
 	if len(DiscoveryToken) == 0 {
 		log.Fatal("Token for discovery service is missing. Can't start the application without it")
 	}

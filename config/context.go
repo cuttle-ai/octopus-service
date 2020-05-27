@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 
+	//for initialzing the db
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
 	authConfig "github.com/cuttle-ai/auth-service/config"
