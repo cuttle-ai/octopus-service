@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	authConfig "github.com/cuttle-ai/auth-service/config"
+	"github.com/cuttle-ai/brain/appctx"
 	toolkit "github.com/cuttle-ai/db-toolkit"
 	"github.com/cuttle-ai/db-toolkit/datastores/services"
 	gDatastores "github.com/cuttle-ai/go-sdk/services/datastores"
@@ -43,7 +44,7 @@ func GetService(a config.AppContext, serviceID uint) (toolkit.Datastore, error) 
 		st, _ := ds.ds[serviceID]
 		return st, nil
 	}
-	s, err := gDatastores.GetDatastore(a.Log, config.DiscoveryURL, config.DiscoveryToken, authConfig.MasterAppDetails.AccessToken, serviceID)
+	s, err := gDatastores.GetDatastore(appctx.WithAccessToken(a, authConfig.MasterAppDetails.AccessToken), serviceID)
 	if err != nil {
 		a.Log.Error("error while fetching the datastore details from the data integration services")
 		return nil, err

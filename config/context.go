@@ -13,6 +13,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
 	authConfig "github.com/cuttle-ai/auth-service/config"
+	bLog "github.com/cuttle-ai/brain/log"
 	"github.com/cuttle-ai/octopus-service/dict"
 
 	"github.com/jinzhu/gorm"
@@ -124,4 +125,24 @@ func (a *AppContext) ConnectToDB() error {
 		a.Db = d
 	}
 	return err
+}
+
+//Logger returns the logger of the app context
+func (a AppContext) Logger() bLog.Log {
+	return a.Log
+}
+
+//AccessToken of the app
+func (a AppContext) AccessToken() string {
+	return a.Session.ID
+}
+
+//DiscoveryAddress of thedisocvery service
+func (a AppContext) DiscoveryAddress() string {
+	return DiscoveryURL
+}
+
+//DiscoveryToken of the discovery service
+func (a AppContext) DiscoveryToken() string {
+	return DiscoveryToken
 }
