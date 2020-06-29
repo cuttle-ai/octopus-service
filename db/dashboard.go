@@ -5,6 +5,8 @@
 package db
 
 import (
+	"fmt"
+
 	"github.com/cuttle-ai/octopus-service/config"
 	"github.com/jinzhu/gorm"
 )
@@ -53,7 +55,7 @@ type DashboardPage struct {
 	//DashboardID  is the id of the dashboard
 	DashboardID uint
 	//Name is the name of the dashboard page
-	Name uint
+	Name string
 	//Number is the page number in the dashboard for cronological order
 	Number uint
 	//GridSize is the size of the each grid uint. grid will be a square of the given size
@@ -70,11 +72,11 @@ type DashboardPage struct {
 
 const (
 	//PageDefaultWidth is the default width of the page
-	PageDefaultWidth = 100
+	PageDefaultWidth = uint(100)
 	//PageDefaultHeight is the default height of the page
-	PageDefaultHeight = 100
+	PageDefaultHeight = uint(100)
 	//PageDefaultGridSize is the default page grid size
-	PageDefaultGridSize = 10
+	PageDefaultGridSize = uint(10)
 )
 
 //PageGridItem is a grid item in the page layout. It will be linked to the underlying widget.
@@ -96,7 +98,7 @@ type PageGridItem struct {
 }
 
 //AddWidget will add a widget to the dashboard
-func (d *Dashboard) AddWidget(ctx *config.AppContext, w Widget) error {
+func (d *Dashboard) AddWidget(ctx *config.AppContext, w Widget, width, height uint) error {
 	/*
 	 * We will get the last page in the dashboard
 	 * We will try to add the widget inside the page grid
@@ -111,7 +113,7 @@ func (d *Dashboard) AddWidget(ctx *config.AppContext, w Widget) error {
 	}
 
 	//will try to add widget inside the page grid
-	ok, err := page.AddWidget(ctx, w)
+	ok, err := page.AddWidget(ctx, w, width, height)
 	if err != nil {
 		//error while addding a widget to the page
 		ctx.Log.Error("error while adding the widget to the page", page.ID)
@@ -132,7 +134,7 @@ func (d *Dashboard) AddWidget(ctx *config.AppContext, w Widget) error {
 		return err
 	}
 	//and add the widget to the page
-	ok, err = page.AddWidget(ctx, w)
+	ok, err = page.AddWidget(ctx, w, width, height)
 	if err != nil {
 		//error while addding a widget to the page
 		ctx.Log.Error("error while adding the widget to the newly created page", page.ID)
@@ -143,18 +145,82 @@ func (d *Dashboard) AddWidget(ctx *config.AppContext, w Widget) error {
 
 //GetLastPage returns the last page in the dashboard
 func (d *Dashboard) GetLastPage(ctx *config.AppContext) (*DashboardPage, error) {
-	//TODO: implement it
-	return nil, nil
+	dp := &DashboardPage{}
+	err := ctx.Db.Where("dashboard_id = ?", d.ID).Order("number DESC").First(dp).Error
+	if err != nil {
+		return nil, err
+	}
+	return dp, nil
 }
 
 //CreatePage creates a new page for the given dashboard with the given page number
 func (d *Dashboard) CreatePage(ctx *config.AppContext, pageNumber uint) (*DashboardPage, error) {
-	//TODO: implement it
-	return nil, nil
+	newPage := &DashboardPage{
+		DashboardID:    d.ID,
+		Name:           fmt.Sprintf("%s - %d", d.Name, pageNumber),
+		Number:         pageNumber,
+		GridSize:       PageDefaultGridSize,
+		Width:          PageDefaultWidth,
+		Height:         PageDefaultHeight,
+		HasWidgetAdded: true,
+	}
+	err := ctx.Db.Create(newPage).Error
+	if err != nil {
+		return nil, err
+	}
+	return newPage, nil
 }
 
 //AddWidget will try to add a widget to the dashboard page. If succeeds will return true. Else false.
-func (do *DashboardPage) AddWidget(ctx *config.AppContext, w Widget) (bool, error) {
-	//TODO: implement it
+func (dp *DashboardPage) AddWidget(ctx *config.AppContext, w Widget, width, height uint) (bool, error) {
+	pageGrid := &PageGridItem{
+		DashboardPageID: dp.ID,
+		WidgetID:        w.ID,
+		X:               0,
+		Y:               0,
+		Width:           width,
+		Height:          height,
+	}
+	if len(dp.PageGridItems) == 0 {
+		err := ctx.Db.Create(pageGrid).Error
+		if err == nil {
+			dp.PageGridItems = append(dp.PageGridItems, *pageGrid)
+		}
+		return err == nil, err
+	}
 	return false, nil
+}
+
+//GetPageLayout will return the page layout filled with the occupied positions as true
+func (dp *DashboardPage) GetPageLayout() [][]bool {
+	/*
+	 * We will first initialize the grid
+	 * Then we will set the cells in the grid as true where the grid item exists
+	 */
+	//initializing the grid
+	grid := [][]bool{}
+	if dp.Height == 0 || dp.Width == 0 {
+		return grid
+	}
+
+	for i := uint(0); i < dp.Height; i++ {
+		row := []bool{}
+		for j := uint(0); j < dp.Width; j++ {
+			row = append(row, false)
+		}
+		grid = append(grid, row)
+	}
+
+	//setting the cells in the grid as true where the grid items exist
+	for _, v := range dp.PageGridItems {
+		if v.Y < 0 || v.X < 0 || v.Y >= uint(len(grid)) || v.X >= uint(len(grid[0])) {
+			continue
+		}
+		for i := v.Y; i < v.Y+v.Height; i++ {
+			for j := v.X; j < v.X+v.Width; j++ {
+				grid[i][j] = true
+			}
+		}
+	}
+	return grid
 }
